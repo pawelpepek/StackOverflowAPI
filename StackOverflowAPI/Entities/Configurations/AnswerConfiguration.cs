@@ -11,5 +11,11 @@ public class AnswerConfiguration : IEntityTypeConfiguration<Answer>
                .WithMany(u => u.Answers)
                .HasForeignKey(m => m.AuthorId)
                .IsRequired();
+
+        builder.HasOne(a => a.Question)
+               .WithMany(m => m.Answers)
+               .HasForeignKey(a => a.QuestionId)
+               .OnDelete(DeleteBehavior.ClientCascade)
+               .IsRequired();
     }
 }
