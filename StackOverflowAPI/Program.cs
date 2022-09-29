@@ -1,13 +1,17 @@
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StackOverflowAPI.Dtos;
 using StackOverflowAPI.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAutoMapper(typeof(StackOverflowDbContext).Assembly);
 
 builder.Services.AddDbContext<StackOverflowDbContext>
-    (o=> o.UseSqlServer(builder.Configuration.GetConnectionString("DbConnectionString")));
+    (o => o.UseSqlServer(builder.Configuration.GetConnectionString("DbConnectionString")));
 
 var app = builder.Build();
 
