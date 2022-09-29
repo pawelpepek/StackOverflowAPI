@@ -9,6 +9,7 @@ public interface IQuestionService
 {
     Task<QuestionDto> AddNewQuestion(string email, string content);
     List<QuestionDto> GetUserQuestions(string email);
+    Task<PostDto> AddAnswer(long questionId, CreateAnswerDto answerDto);
 }
 
 public class QuestionService : IQuestionService
@@ -52,5 +53,37 @@ public class QuestionService : IQuestionService
             .Where(q => q.Author.Email.ToLower() == email.ToLower().Trim())
             .Select(_mapper.Map<QuestionDto>)
             .ToList();
+    }
+
+    public async Task<PostDto> AddAnswer(long questionId, CreateAnswerDto answerDto)
+    {
+        var user = await _userService.FindUser(answerDto.AuthorEmail);
+        var question = await FindQuestion(questionId);
+
+        var answer = new Answer() 
+        {
+            AuthorId = user.Id, 
+            Content = answerDto.Content,
+            QuestionId=question.Id
+        };
+
+        _db.Answers.Add(answer);
+
+        await _db.SaveChangesAsync();
+
+        return _mapper.Map<PostDto>(answer);
+    }
+
+    private async Task<Question> FindQuestion(long id)
+    {
+        var user = await _db.Questions.FirstOrDefaultAsync(q => q.Id == id);
+        if (user == null)
+        {
+            throw new Exception("Question doesn't exist!");
+        }
+        else
+        {
+            return user;
+        }
     }
 }
