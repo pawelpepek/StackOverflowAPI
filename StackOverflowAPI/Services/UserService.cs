@@ -11,6 +11,7 @@ public interface IUserService
     Task<int> AddNewUser(UserDto dto);
     List<UserDto> GetUsers();
     Task UpdateUser(UserDto dto);
+    Task<User> FindUser(string email);
 }
 
 public class UserService : IUserService
@@ -64,7 +65,7 @@ public class UserService : IUserService
         await _db.SaveChangesAsync();
     }
 
-    private async Task<User> FindUser(string email)
+    public async Task<User> FindUser(string email)
     {
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower().Trim());
         if (user == null)

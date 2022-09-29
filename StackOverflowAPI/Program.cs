@@ -11,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(StackOverflowDbContext).Assembly);
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
 
 builder.Services.AddDbContext<StackOverflowDbContext>
     (o => o.UseSqlServer(builder.Configuration.GetConnectionString("DbConnectionString")));
@@ -30,5 +31,8 @@ app.MapPost("/users", async (IUserService service, [FromBody] UserDto dto) => aw
 app.MapGet("/users", (IUserService service) => service.GetUsers());
 app.MapGet("/users/{email}", async (IUserService service, string email) => await service.GetUser(email));
 app.MapPut("/users", (IUserService service, [FromBody] UserDto dto) => service.UpdateUser(dto));
+
+app.MapPost("/users/{email}/questions", async (IQuestionService service,string email,  [FromBody] string content) 
+    => await service.AddNewQuestion(email,content));
 
 app.Run();
