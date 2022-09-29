@@ -10,5 +10,11 @@ public class MappingProfile : Profile
     {
         CreateMap<UserDto, User>();
         CreateMap<User, UserDto>();
+
+        CreateMap<Question, QuestionDto>();
+        CreateMap<Post, PostDto>();
+        CreateMap<Message, MessageDto>();
+
+
     }
 }
