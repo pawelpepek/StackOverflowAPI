@@ -8,6 +8,7 @@ namespace StackOverflowAPI.Services;
 public interface IQuestionService
 {
     Task<QuestionDto> AddNewQuestion(string email, string content);
+    List<QuestionDto> GetUserQuestions(string email);
 }
 
 public class QuestionService : IQuestionService
@@ -34,5 +35,22 @@ public class QuestionService : IQuestionService
         await _db.SaveChangesAsync();
 
         return _mapper.Map<QuestionDto>(newQuestion);
+    }
+
+    public List<QuestionDto> GetUserQuestions(string email)
+    {
+        return _db.Questions
+            .AsNoTracking()
+            .Include(q => q.Author)
+            .Include(q => q.Answers)
+            .ThenInclude(qu => qu.Author)
+            .Include(q => q.Answers)
+            .ThenInclude(qa => qa.Comments)
+            .ThenInclude(ac => ac.Author)
+            .Include(q => q.Comments)
+            .ThenInclude(c => c.Author)
+            .Where(q => q.Author.Email.ToLower() == email.ToLower().Trim())
+            .Select(_mapper.Map<QuestionDto>)
+            .ToList();
     }
 }

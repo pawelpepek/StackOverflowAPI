@@ -34,5 +34,8 @@ app.MapPut("/users", (IUserService service, [FromBody] UserDto dto) => service.U
 
 app.MapPost("/users/{email}/questions", async (IQuestionService service,string email,  [FromBody] string content) 
     => await service.AddNewQuestion(email,content));
+app.MapGet("/users/{email}/questions", (IQuestionService service, string email)
+    => service.GetUserQuestions(email));
+
 
 app.Run();
