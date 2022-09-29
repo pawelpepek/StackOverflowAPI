@@ -24,28 +24,22 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapPost("/users", async (StackOverflowDbContext db, IMapper mapper, [FromBody] UserDto dto) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    if (db.Users.Any(u => u.Email.ToLower().Trim() == dto.Email.ToLower()))
+    {
+        throw new Exception("Email exists in database!");
+    }
+    else
+    {
+        dto.Email = dto.Email.Trim();
+        var user = mapper.Map<User>(dto);
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateTime.Now.AddDays(index),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+        await db.Users.AddAsync(user);
+        await db.SaveChangesAsync();
+
+        return user.Id;
+    }
+});
 
 app.Run();
-
-internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
