@@ -12,14 +12,17 @@ public class QuestionService : IQuestionService
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
     private readonly IMessageFinderService _finderService;
+    private readonly IMessageService _messsageService;
 
     public QuestionService(StackOverflowDbContext db, IMapper mapper, 
-        IUserService userService, IMessageFinderService finderService)
+        IUserService userService, IMessageFinderService finderService,
+        IMessageService messsageService)
     {
         this._db = db;
         this._mapper = mapper;
         this._userService = userService;
         this._finderService = finderService;
+        this._messsageService = messsageService;
     }
 
     public async Task<QuestionDto> AddNewQuestion(string email, string content)
@@ -37,6 +40,28 @@ public class QuestionService : IQuestionService
 
     public List<QuestionDto> GetUserQuestions(string email)
     {
+        return QuestionsWithAdditionalInfo()
+            .Where(q => q.Author.Email.ToLower() == email.ToLower().Trim())
+            .Select(_mapper.Map<QuestionDto>)
+            .ToList();
+    }
+
+    public QuestionDto GetQuestion(long questionId)
+    {
+        var question = QuestionsWithAdditionalInfo().FirstOrDefault(q => q.Id == questionId);
+
+        if(question==null)
+        {
+            throw new Exception("Question doesn't exist!");
+        }
+        else
+        {
+            return _mapper.Map<QuestionDto>(question);
+        }
+    }
+
+    private IEnumerable<Question> QuestionsWithAdditionalInfo()
+    {
         return _db.Questions
             .AsNoTracking()
             .Include(q => q.Author)
@@ -46,37 +71,6 @@ public class QuestionService : IQuestionService
             .ThenInclude(qa => qa.Comments)
             .ThenInclude(ac => ac.Author)
             .Include(q => q.Comments)
-            .ThenInclude(c => c.Author)
-            .Where(q => q.Author.Email.ToLower() == email.ToLower().Trim())
-            .Select(_mapper.Map<QuestionDto>)
-            .ToList();
-    }
-
-    public async Task<PostDto> AddAnswer(long questionId, CreateAnswerDto answerDto)
-    {
-        var user = await _userService.FindUser(answerDto.AuthorEmail);
-        var question = await _finderService.FindEntity<Question>(questionId);
-
-        var answer = new Answer() 
-        {
-            AuthorId = user.Id, 
-            Content = answerDto.Content,
-            QuestionId=question.Id
-        };
-
-        _db.Answers.Add(answer);
-
-        await _db.SaveChangesAsync();
-
-        return _mapper.Map<PostDto>(answer);
-    }
-
-    {
-        {
-            throw new Exception("Question doesn't exist!");
-        }
-        else
-        {
-        }
+            .ThenInclude(c => c.Author);
     }
 }

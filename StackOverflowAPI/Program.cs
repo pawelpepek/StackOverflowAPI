@@ -14,6 +14,7 @@ builder.Services.AddAutoMapper(typeof(StackOverflowDbContext).Assembly);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IMessageFinderService, MessageFinderService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
 
 builder.Services.AddDbContext<StackOverflowDbContext>
     (o => o.UseSqlServer(builder.Configuration.GetConnectionString("DbConnectionString")));
@@ -39,8 +40,10 @@ app.MapPost("/users/{email}/questions", async (IQuestionService service,string e
 app.MapGet("/users/{email}/questions", (IQuestionService service, string email)
     => service.GetUserQuestions(email));
 
-app.MapPost("/question/{id}/answer", async (IQuestionService service, long id, [FromBody] CreateAnswerDto answer)
-    => await service.AddAnswer(id, answer));
+app.MapGet("/questions/{id}", (IQuestionService service, long id)
+    => service.GetQuestion(id));
 
+app.MapPost("/questions/{id}/answer", async (IMessageService service, long id, [FromBody] CreateMessageDto answer)
+    => await service.AddChildMessage<Question, Answer>(id, answer));
 
 app.Run();
