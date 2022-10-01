@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StackOverflowAPI.Dtos;
 using StackOverflowAPI.Entities;
+using StackOverflowAPI.Interfaces;
 using StackOverflowAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(StackOverflowDbContext).Assembly);
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
+builder.Services.AddScoped<IMessageFinderService, MessageFinderService>();
 
 builder.Services.AddDbContext<StackOverflowDbContext>
     (o => o.UseSqlServer(builder.Configuration.GetConnectionString("DbConnectionString")));

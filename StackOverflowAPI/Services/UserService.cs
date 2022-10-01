@@ -2,17 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using StackOverflowAPI.Dtos;
 using StackOverflowAPI.Entities;
+using StackOverflowAPI.Interfaces;
 
 namespace StackOverflowAPI.Services;
-
-public interface IUserService
-{
-    Task<UserDto> GetUser(string email);
-    Task<int> AddNewUser(UserDto dto);
-    List<UserDto> GetUsers();
-    Task UpdateUser(UserDto dto);
-    Task<User> FindUser(string email);
-}
 
 public class UserService : IUserService
 {

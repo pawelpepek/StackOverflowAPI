@@ -2,27 +2,24 @@
 using Microsoft.EntityFrameworkCore;
 using StackOverflowAPI.Dtos;
 using StackOverflowAPI.Entities;
+using StackOverflowAPI.Interfaces;
 
 namespace StackOverflowAPI.Services;
-
-public interface IQuestionService
-{
-    Task<QuestionDto> AddNewQuestion(string email, string content);
-    List<QuestionDto> GetUserQuestions(string email);
-    Task<PostDto> AddAnswer(long questionId, CreateAnswerDto answerDto);
-}
 
 public class QuestionService : IQuestionService
 {
     private readonly StackOverflowDbContext _db;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
+    private readonly IMessageFinderService _finderService;
 
-    public QuestionService(StackOverflowDbContext db, IMapper mapper, IUserService userService)
+    public QuestionService(StackOverflowDbContext db, IMapper mapper, 
+        IUserService userService, IMessageFinderService finderService)
     {
         this._db = db;
         this._mapper = mapper;
         this._userService = userService;
+        this._finderService = finderService;
     }
 
     public async Task<QuestionDto> AddNewQuestion(string email, string content)
@@ -58,7 +55,7 @@ public class QuestionService : IQuestionService
     public async Task<PostDto> AddAnswer(long questionId, CreateAnswerDto answerDto)
     {
         var user = await _userService.FindUser(answerDto.AuthorEmail);
-        var question = await FindQuestion(questionId);
+        var question = await _finderService.FindEntity<Question>(questionId);
 
         var answer = new Answer() 
         {
@@ -74,16 +71,12 @@ public class QuestionService : IQuestionService
         return _mapper.Map<PostDto>(answer);
     }
 
-    private async Task<Question> FindQuestion(long id)
     {
-        var user = await _db.Questions.FirstOrDefaultAsync(q => q.Id == id);
-        if (user == null)
         {
             throw new Exception("Question doesn't exist!");
         }
         else
         {
-            return user;
         }
     }
 }
