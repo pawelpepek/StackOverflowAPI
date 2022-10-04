@@ -37,7 +37,10 @@ public class MessageService : IMessageService
 
         if(!SetPropertyValue(rootMessage.GetType().Name, childMessage, rootMessage.Id))
         {
-            var parentClasses = typeof(MessageService).Assembly.GetExportedTypes().Where(t => typeof(TRoot).IsSubclassOf(t)).ToList();
+            var parentClasses = typeof(MessageService).Assembly.GetExportedTypes()
+                                                               .Where(t => typeof(TRoot)
+                                                               .IsSubclassOf(t))
+                                                               .ToList();
 
             var i = 0;
             while(i< parentClasses.Count)
