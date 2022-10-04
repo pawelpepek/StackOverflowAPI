@@ -11,5 +11,8 @@ public class QuestionConfiguration : IEntityTypeConfiguration<Question>
                .WithMany(u => u.Questions)
                .HasForeignKey(m => m.AuthorId)
                .IsRequired();
+
+        builder.HasMany(m => m.Tags)
+               .WithMany(t => t.Questions);
     }
 }
