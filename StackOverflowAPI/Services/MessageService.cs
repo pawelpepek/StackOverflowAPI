@@ -36,6 +36,14 @@ public class MessageService : IMessageService
         };
 
         var propertyInfo = childMessage.GetType().GetProperty($"{typeof(TRoot).Name}Id");
+
+        if (propertyInfo == null)
+        {
+            propertyInfo = childMessage.GetType()
+                                     .GetProperties()
+                                     .FirstOrDefault(p => p.Name.EndsWith("Id") && p.Name.Length > 2);
+        }
+
         propertyInfo.SetValue(childMessage, rootMessage.Id);
 
         await _db.Set<TChild>().AddAsync(childMessage);
