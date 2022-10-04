@@ -22,17 +22,17 @@ public class MessageService : IMessageService
         this._finderService = finderService;
     }
 
-    public async Task<MessageDto> AddChildMessage<TRoot, TChild>(long rootId, CreateMessageDto answerDto)
+    public async Task<MessageDto> AddChildMessage<TRoot, TChild>(long rootId, CreateMessageDto messageDto)
         where TRoot : Message
         where TChild : Message, new()
     {
-        var user = await _userService.FindUser(answerDto.AuthorEmail);
+        var user = await _userService.FindUser(messageDto.AuthorEmail);
         var rootMessage = await _finderService.FindEntity<TRoot>(rootId);
 
         var childMessage = new TChild()
         {
             AuthorId = user.Id,
-            Content = answerDto.Content,
+            Content = messageDto.Content,
         };
 
         if(!SetPropertyValue(rootMessage.GetType().Name, childMessage, rootMessage.Id))
