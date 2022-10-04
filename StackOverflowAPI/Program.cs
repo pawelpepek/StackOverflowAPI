@@ -15,6 +15,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IMessageFinderService, MessageFinderService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IRankService, RankService>();
 
 builder.Services.AddDbContext<StackOverflowDbContext>
     (o => o.UseSqlServer(builder.Configuration.GetConnectionString("DbConnectionString")));
@@ -80,6 +81,8 @@ app.MapPost("/questions/{id}/comment", async (IMessageService service, long id, 
 app.MapPost("/answers/{id}/comment", async (IMessageService service, long id, [FromBody] CreateMessageDto comment)
     => await service.AddChildMessage<Answer, Comment>(id, comment));
 
+app.MapPut("/questions/{id}/vote", (IRankService service, VoteDto dto) => service.Vote<Question>(dto));
+app.MapPut("/answer/{id}/vote", (IRankService service, VoteDto dto) => service.Vote<Answer>(dto));
 
 
 app.Run();

@@ -49,7 +49,7 @@ public class QuestionService : IQuestionService
     {
         var question = QuestionsWithAdditionalInfo().FirstOrDefault(q => q.Id == questionId);
 
-        if(question==null)
+        if (question == null)
         {
             throw new Exception("Question doesn't exist!");
         }
@@ -63,14 +63,20 @@ public class QuestionService : IQuestionService
     {
         return _db.Questions
             .AsNoTracking()
-            .Include(q=>q.Tags)
+            .Include(q => q.UserDislikes)
+            .Include(q => q.UserLikes)
+            .Include(q => q.Tags)
             .Include(q => q.Author)
             .Include(q => q.Answers)
-            .ThenInclude(qu => qu.Author)
+                .ThenInclude(qu => qu.Author)
             .Include(q => q.Answers)
-            .ThenInclude(qa => qa.Comments)
-            .ThenInclude(ac => ac.Author)
+                .ThenInclude(qa => qa.Comments)
+                    .ThenInclude(ac => ac.Author)
+            .Include(q => q.Answers)
+                .ThenInclude(a => a.UserLikes)
+            .Include(q => q.Answers)
+                .ThenInclude(a => a.UserDislikes)
             .Include(q => q.Comments)
-            .ThenInclude(c => c.Author);
+                .ThenInclude(c => c.Author);
     }
 }
