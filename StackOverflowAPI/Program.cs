@@ -74,4 +74,10 @@ app.MapGet("/questions/{id}", (IQuestionService service, long id)
 app.MapPost("/questions/{id}/answer", async (IMessageService service, long id, [FromBody] CreateMessageDto answer)
     => await service.AddChildMessage<Question, Answer>(id, answer));
 
+app.MapPost("/questions/{id}/comment", async (IMessageService service, long id, [FromBody] CreateMessageDto comment)
+    => await service.AddChildMessage<Question, Comment>(id, comment));
+
+app.MapPost("/answers/{id}/comment", async (IMessageService service, long id, [FromBody] CreateMessageDto comment)
+    => await service.AddChildMessage<Answer, Comment>(id, comment));
+
 app.Run();
