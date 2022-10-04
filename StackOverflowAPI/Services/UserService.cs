@@ -72,6 +72,4 @@ public class UserService : IUserService
  
     private bool UserExists(string email)
         => _db.Users.Any(u => u.Email.ToLower() == email.ToLower().Trim());
-
-
 }

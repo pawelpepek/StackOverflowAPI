@@ -11,18 +11,12 @@ public class QuestionService : IQuestionService
     private readonly StackOverflowDbContext _db;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
-    private readonly IMessageFinderService _finderService;
-    private readonly IMessageService _messsageService;
 
-    public QuestionService(StackOverflowDbContext db, IMapper mapper, 
-        IUserService userService, IMessageFinderService finderService,
-        IMessageService messsageService)
+    public QuestionService(StackOverflowDbContext db, IMapper mapper, IUserService userService)
     {
         this._db = db;
         this._mapper = mapper;
         this._userService = userService;
-        this._finderService = finderService;
-        this._messsageService = messsageService;
     }
 
     public async Task<QuestionDto> AddNewQuestion(CreateQuestionDto dto)
