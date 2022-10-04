@@ -35,21 +35,39 @@ public class MessageService : IMessageService
             Content = answerDto.Content,
         };
 
-        var propertyInfo = childMessage.GetType().GetProperty($"{typeof(TRoot).Name}Id");
-
-        if (propertyInfo == null)
+        if(!SetPropertyValue(rootMessage.GetType().Name, childMessage, rootMessage.Id))
         {
-            propertyInfo = childMessage.GetType()
-                                     .GetProperties()
-                                     .FirstOrDefault(p => p.Name.EndsWith("Id") && p.Name.Length > 2);
-        }
+            var parentClasses = typeof(MessageService).Assembly.GetExportedTypes().Where(t => typeof(TRoot).IsSubclassOf(t)).ToList();
 
-        propertyInfo.SetValue(childMessage, rootMessage.Id);
+            var i = 0;
+            while(i< parentClasses.Count)
+            {
+                if (SetPropertyValue(parentClasses[i++].Name,childMessage, rootMessage.Id))
+                {
+                    i = parentClasses.Count;
+                }
+            }
+        }
 
         await _db.Set<TChild>().AddAsync(childMessage);
 
         await _db.SaveChangesAsync();
 
         return _mapper.Map<MessageDto>(childMessage);
+    }
+
+    private static bool SetPropertyValue(string typeName, object obj,long value)
+    {
+        var propertyInfo = obj.GetType().GetProperty($"{typeName}Id");
+        if (propertyInfo != null)
+        {
+            propertyInfo.SetValue(obj, value);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
     }
 }
