@@ -11,10 +11,9 @@ public class MappingProfile : Profile
         CreateMap<UserDto, User>();
         CreateMap<User, UserDto>();
 
-        CreateMap<Question, QuestionDto>();
+        CreateMap<Question, QuestionDto>()
+            .ForMember(q => q.Tags, d => d.MapFrom(qq => qq.Tags.Select(t => t.Text).ToList()));
         CreateMap<Post, PostDto>();
         CreateMap<Message, MessageDto>();
-
-
     }
 }

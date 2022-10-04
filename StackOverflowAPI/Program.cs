@@ -21,11 +21,39 @@ builder.Services.AddDbContext<StackOverflowDbContext>
 
 var app = builder.Build();
 
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+using var scope = app.Services.CreateScope();
+var dbContext = scope.ServiceProvider.GetService<StackOverflowDbContext>();
+
+var pendingMigrations = dbContext.Database.GetPendingMigrations();
+
+if (pendingMigrations.Any())
+{
+    dbContext.Database.Migrate();
+}
+
+if (!dbContext.Tags.Any())
+{
+    dbContext.Tags.AddRange(
+        new List<Tag>(){
+                        new Tag(){Text="C#"},
+                        new Tag(){Text="EF Core"},
+                        new Tag(){Text="Java"},
+                        new Tag(){Text="C++"},
+                        new Tag(){Text="Angular"},
+                        new Tag(){Text="React"},
+                        new Tag(){Text="JavaScript"},
+        });
+
+    dbContext.SaveChanges();
 }
 
 app.UseHttpsRedirection();
@@ -35,8 +63,8 @@ app.MapGet("/users", (IUserService service) => service.GetUsers());
 app.MapGet("/users/{email}", async (IUserService service, string email) => await service.GetUser(email));
 app.MapPut("/users", (IUserService service, [FromBody] UserDto dto) => service.UpdateUser(dto));
 
-app.MapPost("/users/{email}/questions", async (IQuestionService service,string email,  [FromBody] string content) 
-    => await service.AddNewQuestion(email,content));
+app.MapPost("/questions", async (IQuestionService service, [FromBody] CreateQuestionDto dto)
+    => await service.AddNewQuestion(dto));
 app.MapGet("/users/{email}/questions", (IQuestionService service, string email)
     => service.GetUserQuestions(email));
 

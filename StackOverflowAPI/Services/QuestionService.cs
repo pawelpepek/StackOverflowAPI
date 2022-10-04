@@ -25,11 +25,16 @@ public class QuestionService : IQuestionService
         this._messsageService = messsageService;
     }
 
-    public async Task<QuestionDto> AddNewQuestion(string email, string content)
+    public async Task<QuestionDto> AddNewQuestion(CreateQuestionDto dto)
     {
-        var user = await _userService.FindUser(email);
+        var user = await _userService.FindUser(dto.AuthorEmail);
 
-        var newQuestion = new Question() { AuthorId = user.Id, Content = content };
+        var newQuestion = new Question()
+        {
+            AuthorId = user.Id,
+            Content = dto.Content,
+            Tags = _db.Tags.Where(t => dto.TagsIds.Contains(t.Id)).ToList()
+        };
 
         _db.Questions.Add(newQuestion);
 
@@ -64,6 +69,7 @@ public class QuestionService : IQuestionService
     {
         return _db.Questions
             .AsNoTracking()
+            .Include(q=>q.Tags)
             .Include(q => q.Author)
             .Include(q => q.Answers)
             .ThenInclude(qu => qu.Author)
