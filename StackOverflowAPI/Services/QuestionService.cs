@@ -63,8 +63,7 @@ public class QuestionService : IQuestionService
     {
         return _db.Questions
             .AsNoTracking()
-            .Include(q => q.UserDislikes)
-            .Include(q => q.UserLikes)
+            .Include(q => q.Votes)
             .Include(q => q.Tags)
             .Include(q => q.Author)
             .Include(q => q.Answers)
@@ -73,9 +72,7 @@ public class QuestionService : IQuestionService
                 .ThenInclude(qa => qa.Comments)
                     .ThenInclude(ac => ac.Author)
             .Include(q => q.Answers)
-                .ThenInclude(a => a.UserLikes)
-            .Include(q => q.Answers)
-                .ThenInclude(a => a.UserDislikes)
+                .ThenInclude(a => a.Votes)
             .Include(q => q.Comments)
                 .ThenInclude(c => c.Author);
     }

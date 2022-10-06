@@ -10,6 +10,5 @@ public class User
     public virtual List<Answer> Answers{ get; set; }
     public virtual List<Comment> Comments { get; set; }
 
-    public virtual List<Post> LikedPosts { get; set; }
-    public virtual List<Post> DislikedPosts { get; set; }
+    public virtual List<Vote> Votes { get; set; } = new();
 }

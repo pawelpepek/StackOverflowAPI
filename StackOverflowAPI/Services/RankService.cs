@@ -20,8 +20,7 @@ public class RankService : IRankService
     {
         var user = await _userService.FindUser(dto.UserEmail);
 
-        var post = await _db.Set<TEntity>().Include(p => p.UserLikes)
-                                           .Include(p => p.UserDislikes)
+        var post = await _db.Set<TEntity>().Include(p => p.Votes)
                                            .FirstOrDefaultAsync(p => p.Id == dto.PostId);
         if (post == null)
         {
@@ -29,33 +28,37 @@ public class RankService : IRankService
         }
         else
         {
-            var listToAdd = dto.Like ? post.UserLikes : post.UserDislikes;
-            var listToRemove = dto.Like ? post.UserDislikes : post.UserLikes;
-
-            if(post.AuthorId==user.Id)
+            if (post.AuthorId == user.Id)
             {
                 throw new Exception("You can't rate your post");
             }
 
-            if (listToAdd.Contains(user))
+            var lastVote = post.Votes.FirstOrDefault(v => v.UserId == user.Id);
+
+            if (lastVote != null)
             {
-                throw new Exception("Can't rate a post a second time");
-            }
-            else
-            {
-                if (listToRemove.Contains(user))
+                if (lastVote.Like == dto.Like)
                 {
-                    listToRemove.Remove(user);
+                    throw new Exception("Can't rate a post a second time");
                 }
                 else
                 {
-                    listToAdd.Add(user);
+                    _db.Votes.Remove(lastVote);
                 }
-
-                await _db.SaveChangesAsync();
-
-                return post.Rank;
             }
+            else
+            {
+                _db.Votes.Add(new Vote()
+                {
+                    Like = dto.Like,
+                    PostId = dto.PostId,
+                    UserId = user.Id
+                });
+            }
+
+            await _db.SaveChangesAsync();
+
+            return post.Rank;
         }
     }
 }

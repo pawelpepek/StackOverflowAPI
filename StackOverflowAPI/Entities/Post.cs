@@ -2,10 +2,8 @@
 
 public abstract class Post : Message
 {
-    public virtual List<User> UserDislikes { get; set; } = new();
-    public virtual List<User> UserLikes { get; set; } = new();
+    public virtual List<Vote> Votes { get; set; } = new();
     public virtual List<Comment> Comments { get; set; }
 
-
-    public int Rank => UserLikes.Count - UserDislikes.Count;
+    public int Rank => Votes.Sum(v => v.Like ? 1 : -1);
 }
